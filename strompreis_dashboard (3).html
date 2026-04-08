@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strompreis-Übersicht – Day-Ahead DE-LU</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f4f0;
+  --paper: #ffffff;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --ink-faint: #7a7a7a;
+  --rule: #d4d4cc;
+  --rule-strong: #2a2a2a;
+  --accent: #1a3a6c;
+  --accent-pale: #e8eef5;
+  --warn: #8a5a00;
+  --warn-pale: #fff4d6;
+  --cheap: #2d6a3e;
+  --cheap-pale: #e3f0e7;
+  --mid: #8a5a00;
+  --mid-pale: #fdf0d4;
+  --expensive: #963232;
+  --expensive-pale: #f5e0e0;
+  --negative: #1f5a7a;
+  --negative-pale: #e0ecf2;
+  --shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Source Sans 3', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 28px 48px;
+}
+
+header {
+  border-bottom: 3px double var(--rule-strong);
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: end;
+}
+
+.title {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+
+.status {
+  text-align: right;
+  font-size: 11px;
+  color: var(--ink-faint);
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--accent-pale);
+  color: var(--accent);
+  border: 1px solid #c4d0e0;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.status-badge.error { background: var(--expensive-pale); color: var(--expensive); border-color: #d8b0b0; }
+
+.navbar {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.mode-switch, .nav-arrows {
+  display: flex;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+}
+
+.mode-btn, .nav-btn {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.mode-btn:last-child, .nav-btn:last-child { border-right: none; }
+.mode-btn:hover, .nav-btn:hover:not(:disabled) { background: var(--accent-pale); }
+.mode-btn.active { background: var(--accent); color: white; font-weight: 600; }
+.nav-btn { min-width: 42px; font-size: 14px; }
+.nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.nav-period {
+  flex: 1;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 9px 18px;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: center;
+  min-width: 240px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+}
+.nav-period strong { color: var(--accent); font-weight: 600; margin-right: 6px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.stat { background: var(--paper); padding: 16px 18px; }
+
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.stat-unit {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-left: 4px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+}
+
+.stat-meta {
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat.now .stat-value { color: var(--accent); }
+.stat.cheap .stat-value { color: var(--cheap); }
+.stat.expensive .stat-value { color: var(--expensive); }
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.panel-header {
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafaf6;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.panel-title {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.panel-meta {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-body { padding: 20px; }
+
+.controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+}
+
+.controls select, .controls input[type="number"] {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 5px 8px;
+  font-family: inherit;
+  font-size: 12px;
+}
+.controls select { min-width: 240px; }
+.controls input[type="number"] { width: 64px; text-align: right; }
+.controls input[type="checkbox"] { accent-color: var(--accent); }
+
+.toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+}
+.toggle-btn {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.toggle-btn:last-child { border-right: none; }
+.toggle-btn.active { background: var(--accent); color: white; }
+.toggle-btn:hover:not(.active) { background: var(--accent-pale); }
+
+#chart-container {
+  position: relative;
+  height: 380px;
+  width: 100%;
+}
+
+canvas { display: block; }
+
+.tooltip {
+  position: absolute;
+  background: var(--ink);
+  color: white;
+  padding: 8px 12px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: none;
+  font-variant-numeric: tabular-nums;
+}
+.tooltip strong { color: #ffd980; }
+
+.legend {
+  display: flex;
+  gap: 20px;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 12px; height: 12px; border: 1px solid rgba(0,0,0,0.15); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+thead { background: #fafaf6; }
+th, td {
+  padding: 7px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+}
+th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  font-weight: 600;
+  border-bottom: 2px solid var(--rule-strong);
+}
+td.price { font-weight: 600; }
+td.bar-cell { width: 38%; padding: 6px 12px; }
+td.num { text-align: right; }
+
+.bar {
+  height: 14px;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+.bar.cheap { background: var(--cheap); }
+.bar.mid { background: var(--mid); }
+.bar.expensive { background: var(--expensive); }
+.bar.negative { background: var(--negative); }
+
+tbody tr.now { background: var(--warn-pale); }
+tbody tr.now td:first-child {
+  border-left: 3px solid var(--warn);
+  padding-left: 9px;
+}
+tbody tr:hover { background: #fafaf6; }
+tbody tr.now:hover { background: #fff0c4; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.two-col .panel { margin-bottom: 0; }
+
+.cost-breakdown {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 16px;
+  font-size: 12px;
+  padding: 12px 16px;
+  background: var(--accent-pale);
+  border: 1px solid #c4d0e0;
+  margin-top: 16px;
+}
+.cost-breakdown .label { color: var(--ink-soft); }
+.cost-breakdown .value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+.cost-breakdown .total {
+  border-top: 1px solid #c4d0e0;
+  padding-top: 6px;
+  margin-top: 4px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.cost-breakdown .total .value { color: var(--accent); }
+
+.loading, .empty {
+  color: var(--ink-faint);
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.error {
+  color: var(--expensive);
+  padding: 16px 20px;
+  background: var(--expensive-pale);
+  border: 1px solid #d8b0b0;
+  border-left: 4px solid var(--expensive);
+  margin: 16px 0;
+  font-size: 13px;
+}
+.error strong { font-weight: 600; }
+.error code {
+  background: rgba(0,0,0,0.06);
+  padding: 2px 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+
+footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-faint);
+  line-height: 1.6;
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .title { font-size: 20px; }
+  .stat-value { font-size: 22px; }
+  .container { padding: 20px 16px 32px; }
+  header { grid-template-columns: 1fr; }
+  .status { text-align: left; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <div class="title">Strompreis-Übersicht</div>
+      <div class="subtitle">Day-Ahead-Großhandelspreise · Gebotszone DE-LU · Quelle: aWATTar / EPEX Spot</div>
+    </div>
+    <div class="status">
+      <div><span class="status-badge" id="status">Initialisierung</span></div>
+      <div id="last-update">—</div>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Tarif-Konfiguration</div>
+      <div class="controls">
+        <div class="toggle-group">
+          <button class="toggle-btn" data-tax="netto">Netto</button>
+          <button class="toggle-btn active" data-tax="brutto">Brutto (inkl. MwSt.)</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="controls" style="gap:24px">
+        <label>
+          Netzbetreiber
+          <select id="sel-operator"></select>
+        </label>
+        <label>
+          Vertrieb &amp; Marge
+          <input type="number" id="in-vertrieb" value="2.5" step="0.1" min="0">
+          <span style="color:var(--ink-faint)">ct/kWh</span>
+        </label>
+        <label>
+          <input type="checkbox" id="cb-show-spot"> nur Börsenpreis (ohne Aufschläge)
+        </label>
+      </div>
+      <div class="cost-breakdown" id="cost-breakdown">
+        <div class="label">Börsenpreis (Mittelwert Periode)</div><div class="value" id="cb-spot">—</div>
+        <div class="label">Netzentgelte inkl. Messstellenbetrieb</div><div class="value" id="cb-netz">—</div>
+        <div class="label">Stromsteuer</div><div class="value" id="cb-steuer">—</div>
+        <div class="label">Aufschlag § 19 / KWKG / Offshore u.&nbsp;a.</div><div class="value" id="cb-umlagen">—</div>
+        <div class="label">Konzessionsabgabe</div><div class="value" id="cb-konzession">—</div>
+        <div class="label">Vertrieb &amp; Marge</div><div class="value" id="cb-vertrieb">—</div>
+        <div class="label total">Endpreis (<span id="cb-mode-label">brutto</span>)</div><div class="value total" id="cb-total">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="day">Tag</button>
+      <button class="mode-btn" data-mode="week">Woche</button>
+      <button class="mode-btn" data-mode="month">Monat</button>
+    </div>
+    <div class="nav-arrows">
+      <button class="nav-btn" id="nav-prev" title="Zurück (←)">◄</button>
+      <button class="nav-btn" id="nav-today" title="Aktuelle Periode (Leertaste)">●</button>
+      <button class="nav-btn" id="nav-next" title="Vor (→)">►</button>
+    </div>
+    <div class="nav-period" id="nav-period">—</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat now"><div class="stat-label" id="stat-now-label">Aktueller Slot</div><div class="stat-value" id="stat-now">—</div><div class="stat-meta" id="stat-now-meta">—</div></div>
+    <div class="stat cheap"><div class="stat-label" id="stat-min-label">Minimum</div><div class="stat-value" id="stat-min">—</div><div class="stat-meta" id="stat-min-meta">—</div></div>
+    <div class="stat expensive"><div class="stat-label" id="stat-max-label">Maximum</div><div class="stat-value" id="stat-max">—</div><div class="stat-meta" id="stat-max-meta">—</div></div>
+    <div class="stat"><div class="stat-label" id="stat-avg-label">Durchschnitt</div><div class="stat-value" id="stat-avg">—</div><div class="stat-meta" id="stat-avg-meta">—</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Preisverlauf</div>
+      <div class="panel-meta" id="chart-subtitle">stündlich</div>
+    </div>
+    <div class="panel-body">
+      <div id="chart-container">
+        <canvas id="chart"></canvas>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--cheap)"></div>günstig (unteres Drittel)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--mid)"></div>mittel</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--expensive)"></div>teuer (oberes Drittel)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--negative)"></div>negativ</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--warn)"></div>aktueller Slot</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col" id="day-tables">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Heute</div>
+        <div class="panel-meta" id="today-date">—</div>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <div id="table-today"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Morgen</div>
+        <div class="panel-meta" id="tomorrow-date">—</div>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <div id="table-tomorrow"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="aggregate-panel" style="display:none">
+    <div class="panel-header">
+      <div class="panel-title">Tagesübersicht</div>
+      <div class="panel-meta" id="agg-period">—</div>
+    </div>
+    <div class="panel-body" style="padding:0">
+      <div id="table-aggregate"></div>
+    </div>
+  </div>
+
+  <footer>
+    Daten: <a href="https://www.awattar.de/services/api" target="_blank">api.awattar.de</a> · EPEX Spot Day-Ahead DE-LU<br>
+    Netzentgelte 2026: bundeslandspezifische Schätzwerte aus aktuellen Preisblättern der Netzbetreiber (BNetzA, GET AG, Stand Nov 2025).
+    Konzessionsabgabe und Umlagen sind Pauschalwerte für Haushaltskunden &lt; 6.000 kWh/a.
+    Endpreis ist eine <strong>Schätzung</strong> und kann je nach individuellem Vertrag um wenige Cent abweichen.
+  </footer>
+</div>
+
+<script>
+// === NETZBETREIBER 2026 ===
+// Arbeitspreis Netzentgelt netto (ct/kWh) für Haushalte Niederspannung, Standardlastprofil
+// Quelle: Preisblätter 2026, BNetzA, GET AG Trendanalyse
+const OPERATORS = [
+  { id: 'netze-bw', name: 'Netze BW', state: 'BW', netz: 7.57, default: true },
+  { id: 'syna-rhm', name: 'Syna (Rhein-Main-Neckar)', state: 'BW', netz: 8.20 },
+  { id: 'bayernwerk', name: 'Bayernwerk Netz', state: 'BY', netz: 6.50 },
+  { id: 'lew', name: 'LEW Verteilnetz (Schwaben)', state: 'BY', netz: 6.80 },
+  { id: 'swm', name: 'SWM Infrastruktur (München)', state: 'BY', netz: 7.20 },
+  { id: 'mainz-netze', name: 'Mainzer Netze', state: 'RLP', netz: 8.40 },
+  { id: 'pfalzwerke', name: 'Pfalzwerke Netz', state: 'RLP', netz: 7.90 },
+  { id: 'energienetze-mittelrhein', name: 'Energienetze Mittelrhein', state: 'RLP', netz: 8.50 },
+  { id: 'westnetz', name: 'Westnetz (E.ON)', state: 'NRW', netz: 8.40 },
+  { id: 'rng-koeln', name: 'Rheinische NetzGesellschaft (Köln)', state: 'NRW', netz: 8.10 },
+  { id: 'westfalen-weser', name: 'Westfalen Weser Netz', state: 'NRW', netz: 8.60 },
+  { id: 'enni', name: 'ENNI Netz (Niederrhein)', state: 'NRW', netz: 9.20 },
+  { id: 'sh-netz', name: 'Schleswig-Holstein Netz', state: 'SH', netz: 7.30 },
+  { id: 'avacon', name: 'Avacon Netz', state: 'NI', netz: 7.80 },
+  { id: 'ewe-netz', name: 'EWE Netz', state: 'NI', netz: 7.50 },
+  { id: 'stromnetz-hamburg', name: 'Stromnetz Hamburg', state: 'HH', netz: 11.80 },
+  { id: 'wesernetz-bremen', name: 'wesernetz Bremen', state: 'HB', netz: 8.20 },
+  { id: 'edis', name: 'E.DIS Netz (Brandenburg/MV)', state: 'BB', netz: 5.60 },
+  { id: 'mitnetz', name: 'Mitnetz Strom', state: 'SN', netz: 7.10 },
+  { id: 'thueringer-energienetze', name: 'TEN Thüringer Energienetze', state: 'TH', netz: 6.80 },
+  { id: 'stromnetz-berlin', name: 'Stromnetz Berlin', state: 'BE', netz: 7.50 },
+  { id: 'energis', name: 'energis-Netzgesellschaft', state: 'SL', netz: 7.80 },
+  { id: 'custom', name: '— Eigener Wert (9,00 ct/kWh) —', state: 'XX', netz: 9.00, custom: true }
+];
+
+const STATE_LABELS = {
+  BW: 'Baden-Württemberg', BY: 'Bayern', RLP: 'Rheinland-Pfalz',
+  NRW: 'Nordrhein-Westfalen', NI: 'Niedersachsen', SH: 'Schleswig-Holstein',
+  HH: 'Hamburg', HB: 'Bremen', BB: 'Brandenburg / MV', SN: 'Sachsen / Sachsen-Anhalt',
+  TH: 'Thüringen', BE: 'Berlin', SL: 'Saarland', XX: 'Sonstige'
+};
+
+const TAX_RATE = 0.19;
+const STROMSTEUER_NETTO = 2.05;
+const UMLAGEN_NETTO = 2.226; // §19 + KWKG + Offshore + Abschalt
+const KONZESSIONSABGABE_NETTO = 1.66;
+const MESSSTELLENBETRIEB_PER_KWH = 0.50;
+
+const API_AWATTAR = 'https://api.awattar.de/v1/marketdata';
+
+const state = {
+  mode: 'day',
+  anchor: new Date(),
+  cache: new Map(),
+  displayData: [],
+  rawData: [],
+  loading: false,
+  taxMode: 'brutto',
+  operatorId: 'netze-bw',
+  showSpotOnly: false
+};
+
+const $ = id => document.getElementById(id);
+const fmt = (n, d=2) => n == null || isNaN(n) ? '—' : n.toFixed(d).replace('.', ',');
+const pad = n => String(n).padStart(2,'0');
+const fmtTime = ts => { const d = new Date(ts*1000); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtDate = ts => { const d = new Date(ts*1000); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.`; };
+const fmtDateLong = ts => { const d = new Date(ts*1000); return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`; };
+const isoKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function startOfWeek(d) {
+  const x = startOfDay(d);
+  const day = (x.getDay() + 6) % 7;
+  x.setDate(x.getDate() - day);
+  return x;
+}
+function startOfMonth(d) { const x = startOfDay(d); x.setDate(1); return x; }
+
+function getPeriodRange(mode, anchor) {
+  if (mode === 'day') {
+    const s = startOfDay(anchor);
+    const e = new Date(s); e.setDate(e.getDate() + 1);
+    const today = startOfDay(new Date());
+    if (s.getTime() === today.getTime()) e.setDate(e.getDate() + 1);
+    return { start: s, end: e };
+  }
+  if (mode === 'week') {
+    const s = startOfWeek(anchor);
+    const e = new Date(s); e.setDate(e.getDate() + 7);
+    return { start: s, end: e };
+  }
+  const s = startOfMonth(anchor);
+  const e = new Date(s); e.setMonth(e.getMonth() + 1);
+  return { start: s, end: e };
+}
+
+function isoWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+function formatPeriodLabel(mode, anchor) {
+  const r = getPeriodRange(mode, anchor);
+  if (mode === 'day') {
+    const today = startOfDay(new Date());
+    const isToday = r.start.getTime() === today.getTime();
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = r.start.getTime() === yesterday.getTime();
+    const weekday = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][r.start.getDay()];
+    const label = `${weekday}, ${pad(r.start.getDate())}.${pad(r.start.getMonth()+1)}.${r.start.getFullYear()}`;
+    if (isToday) return `<strong>Heute</strong> ${label}`;
+    if (isYesterday) return `<strong>Gestern</strong> ${label}`;
+    return label;
+  }
+  if (mode === 'week') {
+    const last = new Date(r.end); last.setDate(last.getDate() - 1);
+    const wn = isoWeekNumber(r.start);
+    return `<strong>KW ${wn}</strong> ${pad(r.start.getDate())}.${pad(r.start.getMonth()+1)}. – ${pad(last.getDate())}.${pad(last.getMonth()+1)}.${last.getFullYear()}`;
+  }
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  return `<strong>${months[r.start.getMonth()]}</strong> ${r.start.getFullYear()}`;
+}
+
+async function fetchRange(start, end) {
+  const key = `${isoKey(start)}_${isoKey(end)}`;
+  if (state.cache.has(key)) return state.cache.get(key);
+  const url = `${API_AWATTAR}?start=${start.getTime()}&end=${end.getTime()}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  if (!json.data || !Array.isArray(json.data)) throw new Error('Ungültiges Antwortformat');
+  const data = json.data
+    .filter(d => d.marketprice != null)
+    .map(d => ({ ts: Math.floor(d.start_timestamp / 1000), eurMwh: d.marketprice }));
+  state.cache.set(key, data);
+  return data;
+}
+
+async function loadCurrentPeriod() {
+  state.loading = true;
+  $('status').textContent = 'Lade Daten';
+  $('status').className = 'status-badge';
+  removeError();
+  try {
+    const r = getPeriodRange(state.mode, state.anchor);
+    const data = await fetchRange(r.start, r.end);
+    state.rawData = data;
+    $('status').textContent = data.length ? 'Live' : 'Keine Daten';
+    $('last-update').textContent = `Stand: ${new Date().toLocaleTimeString('de-DE')}`;
+    render();
+  } catch (e) {
+    $('status').textContent = 'Fehler';
+    $('status').className = 'status-badge error';
+    showError(e);
+    console.error(e);
+  } finally {
+    state.loading = false;
+  }
+}
+
+function removeError() {
+  document.querySelectorAll('.error').forEach(e => e.remove());
+}
+
+function showError(e) {
+  const isFile = location.protocol === 'file:';
+  const hint = isFile
+    ? `<br><br><strong>Hinweis:</strong> Die Datei wurde per Doppelklick (file://) geöffnet.
+       Manche Browser blockieren API-Aufrufe in diesem Modus. Bitte einen lokalen Webserver starten:<br>
+       <code>cd Downloads &amp;&amp; python -m http.server 8000</code><br>
+       und dann <a href="http://localhost:8000/strompreis_dashboard.html" style="color:var(--accent)">http://localhost:8000/strompreis_dashboard.html</a> öffnen.`
+    : '';
+  document.querySelector('.container').insertAdjacentHTML('beforeend',
+    `<div class="error"><strong>Fehler beim Laden:</strong> ${e.message}${hint}</div>`);
+}
+
+function getNetzentgelt() {
+  const op = OPERATORS.find(o => o.id === state.operatorId);
+  return op ? op.netz : 8.0;
+}
+function getVertrieb() { return parseFloat($('in-vertrieb').value) || 0; }
+
+function calcEndpreis(spotCtNetto) {
+  if (state.showSpotOnly) {
+    return state.taxMode === 'brutto' ? spotCtNetto * (1 + TAX_RATE) : spotCtNetto;
+  }
+  const netz = getNetzentgelt() + MESSSTELLENBETRIEB_PER_KWH;
+  const vertrieb = getVertrieb();
+  const totalNetto = spotCtNetto + netz + STROMSTEUER_NETTO + UMLAGEN_NETTO + KONZESSIONSABGABE_NETTO + vertrieb;
+  return state.taxMode === 'brutto' ? totalNetto * (1 + TAX_RATE) : totalNetto;
+}
+
+function eurMwhToCtKwh(eurMwh) { return eurMwh / 10; }
+
+function aggregateByDay(data) {
+  const byDay = new Map();
+  data.forEach(d => {
+    const date = new Date(d.ts * 1000);
+    const key = isoKey(date);
+    if (!byDay.has(key)) byDay.set(key, { ts: startOfDay(date).getTime()/1000, prices: [] });
+    byDay.get(key).prices.push(d.price);
+  });
+  return Array.from(byDay.values()).map(g => ({
+    ts: g.ts,
+    min: Math.min(...g.prices),
+    max: Math.max(...g.prices),
+    avg: g.prices.reduce((a,b)=>a+b,0) / g.prices.length,
+    count: g.prices.length
+  })).sort((a,b)=>a.ts-b.ts);
+}
+
+function render() {
+  if (!state.rawData) return;
+
+  state.displayData = state.rawData.map(d => {
+    const spotNetto = eurMwhToCtKwh(d.eurMwh);
+    return { ts: d.ts, price: calcEndpreis(spotNetto), eurMwh: d.eurMwh, spotNetto };
+  });
+
+  $('nav-period').innerHTML = formatPeriodLabel(state.mode, state.anchor);
+
+  const labels = {
+    day: { now: 'Aktueller Slot', min: 'Minimum heute', max: 'Maximum heute', avg: 'Durchschnitt heute' },
+    week: { now: 'Aktueller Slot', min: 'Minimum Woche', max: 'Maximum Woche', avg: 'Durchschnitt Woche' },
+    month: { now: 'Aktueller Slot', min: 'Minimum Monat', max: 'Maximum Monat', avg: 'Durchschnitt Monat' }
+  }[state.mode];
+  $('stat-now-label').textContent = labels.now;
+  $('stat-min-label').textContent = labels.min;
+  $('stat-max-label').textContent = labels.max;
+  $('stat-avg-label').textContent = labels.avg;
+
+  $('chart-subtitle').textContent = {
+    day: 'stündlich',
+    week: 'stündlich · 7 Tage',
+    month: 'Tagesmittel · ganzer Monat'
+  }[state.mode];
+
+  if (state.displayData.length) {
+    const prices = state.displayData.map(d => d.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const avg = prices.reduce((a,b)=>a+b,0) / prices.length;
+    const minSlot = state.displayData.find(d => d.price === min);
+    const maxSlot = state.displayData.find(d => d.price === max);
+    $('stat-min').innerHTML = fmt(min) + '<span class="stat-unit">ct/kWh</span>';
+    $('stat-min-meta').textContent = state.mode === 'day' ? `um ${fmtTime(minSlot.ts)} Uhr` : `${fmtDate(minSlot.ts)} ${fmtTime(minSlot.ts)}`;
+    $('stat-max').innerHTML = fmt(max) + '<span class="stat-unit">ct/kWh</span>';
+    $('stat-max-meta').textContent = state.mode === 'day' ? `um ${fmtTime(maxSlot.ts)} Uhr` : `${fmtDate(maxSlot.ts)} ${fmtTime(maxSlot.ts)}`;
+    $('stat-avg').innerHTML = fmt(avg) + '<span class="stat-unit">ct/kWh</span>';
+    $('stat-avg-meta').textContent = `${prices.length} Stunden`;
+
+    const avgSpot = state.displayData.reduce((a,d)=>a+d.spotNetto,0)/state.displayData.length;
+    updateCostBreakdown(avg, avgSpot);
+  } else {
+    ['stat-min','stat-max','stat-avg'].forEach(id => { $(id).textContent = '—'; });
+    ['stat-min-meta','stat-max-meta','stat-avg-meta'].forEach(id => { $(id).textContent = '—'; });
+    updateCostBreakdown(null, null);
+  }
+
+  const nowSec = Math.floor(Date.now()/1000);
+  const current = state.displayData.find(d => d.ts <= nowSec && (d.ts + 3600) > nowSec);
+  if (current) {
+    $('stat-now').innerHTML = fmt(current.price) + '<span class="stat-unit">ct/kWh</span>';
+    $('stat-now-meta').textContent = `${fmtTime(current.ts)} Uhr · Spot ${fmt(current.spotNetto)} ct netto`;
+  } else {
+    $('stat-now').innerHTML = '—';
+    $('stat-now-meta').textContent = 'außerhalb der Periode';
+  }
+
+  if (state.mode === 'day') {
+    $('day-tables').style.display = '';
+    $('aggregate-panel').style.display = 'none';
+    renderDayTables();
+  } else {
+    $('day-tables').style.display = 'none';
+    $('aggregate-panel').style.display = '';
+    renderAggregateTable();
+  }
+
+  const r = getPeriodRange(state.mode, state.anchor);
+  const today = startOfDay(new Date());
+  $('nav-next').disabled = r.end > new Date(today.getTime() + 2*86400*1000);
+
+  drawChart();
+}
+
+function updateCostBreakdown(endpriceCt, spotCtNetto) {
+  $('cb-mode-label').textContent = state.taxMode;
+  if (endpriceCt == null) {
+    ['cb-spot','cb-netz','cb-steuer','cb-umlagen','cb-konzession','cb-vertrieb','cb-total'].forEach(id => $(id).textContent = '—');
+    return;
+  }
+  const factor = state.taxMode === 'brutto' ? (1 + TAX_RATE) : 1;
+  const netz = (getNetzentgelt() + MESSSTELLENBETRIEB_PER_KWH) * factor;
+  const steuer = STROMSTEUER_NETTO * factor;
+  const umlagen = UMLAGEN_NETTO * factor;
+  const konz = KONZESSIONSABGABE_NETTO * factor;
+  const vertrieb = getVertrieb() * factor;
+  const spot = spotCtNetto * factor;
+
+  $('cb-spot').textContent = `${fmt(spot)} ct/kWh`;
+  $('cb-netz').textContent = state.showSpotOnly ? '— (deaktiviert)' : `${fmt(netz)} ct/kWh`;
+  $('cb-steuer').textContent = state.showSpotOnly ? '— (deaktiviert)' : `${fmt(steuer)} ct/kWh`;
+  $('cb-umlagen').textContent = state.showSpotOnly ? '— (deaktiviert)' : `${fmt(umlagen)} ct/kWh`;
+  $('cb-konzession').textContent = state.showSpotOnly ? '— (deaktiviert)' : `${fmt(konz)} ct/kWh`;
+  $('cb-vertrieb').textContent = state.showSpotOnly ? '— (deaktiviert)' : `${fmt(vertrieb)} ct/kWh`;
+  $('cb-total').textContent = `${fmt(endpriceCt)} ct/kWh`;
+}
+
+function renderDayTables() {
+  const now = Math.floor(Date.now()/1000);
+  const r = getPeriodRange(state.mode, state.anchor);
+  const dayStart = Math.floor(r.start.getTime()/1000);
+  const dayEnd = dayStart + 86400;
+  const nextDayEnd = dayEnd + 86400;
+
+  const today = state.displayData.filter(d => d.ts >= dayStart && d.ts < dayEnd);
+  const tomorrow = state.displayData.filter(d => d.ts >= dayEnd && d.ts < nextDayEnd);
+
+  $('today-date').textContent = today.length ? fmtDateLong(today[0].ts) : '—';
+  $('tomorrow-date').textContent = tomorrow.length ? fmtDateLong(tomorrow[0].ts) : '—';
+
+  if (today.length) renderTable('table-today', today, now);
+  else $('table-today').innerHTML = '<div class="empty">keine Daten</div>';
+
+  if (tomorrow.length) {
+    renderTable('table-tomorrow', tomorrow, now);
+  } else {
+    const isToday = startOfDay(r.start).getTime() === startOfDay(new Date()).getTime();
+    $('table-tomorrow').innerHTML = isToday
+      ? `<div class="empty">Day-Ahead-Preise für morgen werden gegen 13:00–14:00 Uhr veröffentlicht.</div>`
+      : `<div class="empty">historische Ansicht – nur ein Tag</div>`;
+  }
+}
+
+function renderTable(id, data, now) {
+  if (!data.length) { $(id).innerHTML = '<div class="empty">keine Daten</div>'; return; }
+  const prices = data.map(d => d.price);
+  const max = Math.max(...prices.map(Math.abs));
+  let html = '<table><thead><tr><th>Zeit</th><th class="num">Preis</th><th class="bar-cell"></th></tr></thead><tbody>';
+  data.forEach(d => {
+    const cat = categorize(d.price, prices);
+    const isNow = d.ts <= now && (d.ts + 3600) > now;
+    const w = (Math.abs(d.price) / max) * 100;
+    html += `<tr class="${isNow?'now':''}">
+      <td>${fmtTime(d.ts)}</td>
+      <td class="price num">${fmt(d.price)} ct</td>
+      <td class="bar-cell"><div class="bar ${cat}" style="width:${w}%"></div></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  $(id).innerHTML = html;
+}
+
+function renderAggregateTable() {
+  const r = getPeriodRange(state.mode, state.anchor);
+  $('agg-period').textContent = `${pad(r.start.getDate())}.${pad(r.start.getMonth()+1)}.${r.start.getFullYear()}`;
+  const days = aggregateByDay(state.displayData);
+  if (!days.length) {
+    $('table-aggregate').innerHTML = '<div class="empty">keine Daten</div>';
+    return;
+  }
+  const allAvgs = days.map(d => d.avg);
+  const maxAbs = Math.max(...days.flatMap(d => [Math.abs(d.min), Math.abs(d.max)]));
+  const weekdays = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  let html = '<table><thead><tr><th>Datum</th><th>Tag</th><th class="num">Min</th><th class="num">Ø</th><th class="num">Max</th><th class="bar-cell">Spanne</th></tr></thead><tbody>';
+  days.forEach(d => {
+    const date = new Date(d.ts*1000);
+    const cat = categorize(d.avg, allAvgs);
+    const isToday = isoKey(date) === isoKey(new Date());
+    const minPct = (Math.max(d.min, 0) / maxAbs) * 100;
+    const widthPct = ((d.max - Math.max(d.min, 0)) / maxAbs) * 100;
+    html += `<tr class="${isToday?'now':''}">
+      <td>${pad(date.getDate())}.${pad(date.getMonth()+1)}.</td>
+      <td style="color:var(--ink-faint)">${weekdays[date.getDay()]}</td>
+      <td class="num">${fmt(d.min)}</td>
+      <td class="num price">${fmt(d.avg)}</td>
+      <td class="num">${fmt(d.max)}</td>
+      <td class="bar-cell"><div class="bar ${cat}" style="width:${widthPct}%; margin-left:${minPct}%"></div></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  $('table-aggregate').innerHTML = html;
+}
+
+function categorize(price, allPrices) {
+  if (price < 0) return 'negative';
+  const sorted = [...allPrices].sort((a,b)=>a-b);
+  const q33 = sorted[Math.floor(sorted.length*0.33)];
+  const q66 = sorted[Math.floor(sorted.length*0.66)];
+  if (price <= q33) return 'cheap';
+  if (price <= q66) return 'mid';
+  return 'expensive';
+}
+
+function drawChart() {
+  const canvas = $('chart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width, H = rect.height;
+  const PAD = { l: 56, r: 16, t: 16, b: 36 };
+  const plotW = W - PAD.l - PAD.r;
+  const plotH = H - PAD.t - PAD.b;
+
+  if (!state.displayData.length) return;
+
+  let chartData, slotDuration, useDaily = false;
+  if (state.mode === 'month') {
+    const days = aggregateByDay(state.displayData);
+    chartData = days.map(d => ({ ts: d.ts, price: d.avg, eurMwh: null, raw: d }));
+    slotDuration = 86400;
+    useDaily = true;
+  } else {
+    chartData = state.displayData;
+    slotDuration = 3600;
+  }
+
+  const prices = chartData.map(d => d.price);
+  const minP = Math.min(0, ...prices);
+  const maxP = (Math.max(...prices) * 1.1) || 10;
+  const range = maxP - minP || 1;
+
+  const r = getPeriodRange(state.mode, state.anchor);
+  const tStart = Math.floor(r.start.getTime()/1000);
+  const tEnd = Math.floor(r.end.getTime()/1000);
+  const tRange = tEnd - tStart;
+
+  const xFor = ts => PAD.l + ((ts - tStart) / tRange) * plotW;
+  const yFor = p => PAD.t + plotH - ((p - minP) / range) * plotH;
+
+  ctx.fillStyle = '#fcfcf8';
+  ctx.fillRect(PAD.l, PAD.t, plotW, plotH);
+
+  ctx.strokeStyle = '#e8e8e0';
+  ctx.lineWidth = 1;
+  ctx.font = '11px "Source Sans 3", sans-serif';
+  ctx.fillStyle = '#7a7a7a';
+
+  const ySteps = 6;
+  for (let i = 0; i <= ySteps; i++) {
+    const p = minP + (range * i / ySteps);
+    const y = yFor(p);
+    ctx.beginPath();
+    ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y);
+    ctx.stroke();
+    ctx.textAlign = 'right';
+    ctx.fillText(fmt(p, 0), PAD.l - 6, y + 4);
+  }
+
+  ctx.textAlign = 'center';
+  if (state.mode === 'day') {
+    const dStart = new Date(tStart * 1000); dStart.setMinutes(0,0,0);
+    for (let h = 0; h <= 48; h += 3) {
+      const t = Math.floor(dStart.getTime()/1000) + h*3600;
+      if (t < tStart || t > tEnd) continue;
+      const x = xFor(t);
+      ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, PAD.t + plotH); ctx.stroke();
+      const d = new Date(t*1000);
+      ctx.fillText(d.getHours() === 0 ? `${pad(d.getDate())}.${pad(d.getMonth()+1)}.` : `${pad(d.getHours())}`, x, H - PAD.b + 14);
+    }
+  } else if (state.mode === 'week') {
+    for (let day = 0; day < 8; day++) {
+      const t = tStart + day * 86400;
+      const x = xFor(t);
+      ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, PAD.t + plotH); ctx.stroke();
+      if (day < 7) {
+        const d = new Date(t*1000);
+        const wd = ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()];
+        ctx.fillText(`${wd} ${pad(d.getDate())}.`, x + (plotW/7)/2, H - PAD.b + 14);
+      }
+    }
+  } else {
+    const d = new Date(r.start);
+    const daysInMonth = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    const step = daysInMonth > 20 ? 5 : 2;
+    for (let day = 0; day < daysInMonth; day++) {
+      const t = tStart + day * 86400;
+      if (day % step === 0) {
+        const xLine = xFor(t);
+        ctx.beginPath(); ctx.moveTo(xLine, PAD.t); ctx.lineTo(xLine, PAD.t + plotH); ctx.stroke();
+        ctx.fillText(`${day+1}`, xFor(t + 86400/2), H - PAD.b + 14);
+      }
+    }
+  }
+
+  if (minP < 0) {
+    const y0 = yFor(0);
+    ctx.strokeStyle = '#888';
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(PAD.l, y0); ctx.lineTo(W - PAD.r, y0); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const now = Math.floor(Date.now()/1000);
+  if (now >= tStart && now <= tEnd) {
+    const xNow = xFor(now);
+    ctx.strokeStyle = '#8a5a00';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(xNow, PAD.t); ctx.lineTo(xNow, PAD.t + plotH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#8a5a00';
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 10px "Source Sans 3", sans-serif';
+    ctx.fillText('JETZT', xNow + 4, PAD.t + 11);
+    ctx.font = '11px "Source Sans 3", sans-serif';
+  }
+
+  const slotW = Math.max(1, (plotW * (slotDuration / tRange)) * 0.82);
+  const colors = { cheap: '#2d6a3e', mid: '#8a5a00', expensive: '#963232', negative: '#1f5a7a' };
+  chartData.forEach(d => {
+    const x = xFor(d.ts + slotDuration/2);
+    const y = yFor(d.price);
+    const y0 = yFor(Math.max(0, minP));
+    const cat = categorize(d.price, prices);
+    ctx.fillStyle = colors[cat];
+    const barH = Math.abs(y - y0);
+    const barY = Math.min(y, y0);
+    ctx.fillRect(x - slotW/2, barY, slotW, Math.max(barH, 1));
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(x - slotW/2, barY, slotW, Math.max(barH, 1));
+  });
+
+  ctx.fillStyle = '#7a7a7a';
+  ctx.textAlign = 'left';
+  ctx.font = 'italic 11px "Source Sans 3", sans-serif';
+  ctx.fillText('ct/kWh', PAD.l, PAD.t - 4);
+
+  canvas.onmousemove = e => {
+    const rectC = canvas.getBoundingClientRect();
+    const mx = e.clientX - rectC.left;
+    const my = e.clientY - rectC.top;
+    if (mx < PAD.l || mx > W - PAD.r) { $('tooltip').style.display = 'none'; return; }
+    let best = null, bestD = Infinity;
+    chartData.forEach(d => {
+      const dx = Math.abs(xFor(d.ts + slotDuration/2) - mx);
+      if (dx < bestD) { bestD = dx; best = d; }
+    });
+    if (!best || bestD > slotW * 1.5) { $('tooltip').style.display = 'none'; return; }
+    const tt = $('tooltip');
+    tt.style.display = 'block';
+    tt.style.left = Math.min(mx + 12, W - 200) + 'px';
+    tt.style.top = (my - 10) + 'px';
+    const d = new Date(best.ts*1000);
+    if (useDaily && best.raw) {
+      tt.innerHTML = `<strong>${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}</strong><br>
+        Mittel: ${fmt(best.price)} ct/kWh<br>
+        Min ${fmt(best.raw.min)} · Max ${fmt(best.raw.max)}`;
+    } else {
+      tt.innerHTML = `<strong>${pad(d.getDate())}.${pad(d.getMonth()+1)}. ${pad(d.getHours())}:00 Uhr</strong><br>
+        ${fmt(best.price)} ct/kWh<br>
+        Spot: ${fmt(best.eurMwh,1)} €/MWh`;
+    }
+  };
+  canvas.onmouseleave = () => $('tooltip').style.display = 'none';
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  loadCurrentPeriod();
+}
+function navigate(delta) {
+  if (delta === 0) state.anchor = new Date();
+  else if (state.mode === 'day') state.anchor.setDate(state.anchor.getDate() + delta);
+  else if (state.mode === 'week') state.anchor.setDate(state.anchor.getDate() + 7*delta);
+  else if (state.mode === 'month') state.anchor.setMonth(state.anchor.getMonth() + delta);
+  loadCurrentPeriod();
+}
+
+function populateOperators() {
+  const sel = $('sel-operator');
+  const groups = {};
+  OPERATORS.forEach(op => {
+    (groups[op.state] = groups[op.state] || []).push(op);
+  });
+  const ordered = ['BW','BY','RLP','SL','NRW','HE','NI','SH','HH','HB','BE','BB','SN','TH','XX'];
+  ordered.forEach(s => {
+    if (!groups[s]) return;
+    const og = document.createElement('optgroup');
+    og.label = STATE_LABELS[s] || s;
+    groups[s].forEach(op => {
+      const opt = document.createElement('option');
+      opt.value = op.id;
+      opt.textContent = op.custom ? op.name : `${op.name} – ${op.netz.toFixed(2).replace('.', ',')} ct/kWh`;
+      if (op.default) opt.selected = true;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => setMode(btn.dataset.mode));
+});
+document.querySelectorAll('.toggle-btn[data-tax]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.taxMode = btn.dataset.tax;
+    document.querySelectorAll('.toggle-btn[data-tax]').forEach(b => b.classList.toggle('active', b.dataset.tax === state.taxMode));
+    render();
+  });
+});
+$('nav-prev').addEventListener('click', () => navigate(-1));
+$('nav-next').addEventListener('click', () => navigate(1));
+$('nav-today').addEventListener('click', () => navigate(0));
+$('sel-operator').addEventListener('change', e => {
+  state.operatorId = e.target.value;
+  render();
+});
+$('in-vertrieb').addEventListener('input', render);
+$('cb-show-spot').addEventListener('change', e => {
+  state.showSpotOnly = e.target.checked;
+  render();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowLeft') navigate(-1);
+  else if (e.key === 'ArrowRight') navigate(1);
+  else if (e.key === 'Home' || e.key === ' ') { e.preventDefault(); navigate(0); }
+  else if (e.key === '1') setMode('day');
+  else if (e.key === '2') setMode('week');
+  else if (e.key === '3') setMode('month');
+});
+
+window.addEventListener('resize', () => { if (state.displayData.length) drawChart(); });
+
+populateOperators();
+loadCurrentPeriod();
+setInterval(() => {
+  const today = startOfDay(new Date());
+  if (state.mode === 'day' && startOfDay(state.anchor).getTime() === today.getTime()) {
+    state.cache.clear();
+    loadCurrentPeriod();
+  }
+}, 15 * 60 * 1000);
+</script>
+</body>
+</html>
