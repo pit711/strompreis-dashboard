@@ -4,8 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Strompreis-Übersicht – Day-Ahead DE-LU</title>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face {
+  font-family: 'Source Sans 3';
+  src: local('Source Sans 3'), local('SourceSans3'), local('Source Sans Pro');
+  font-weight: 400 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  src: local('Source Serif 4'), local('SourceSerif4'), local('Source Serif Pro');
+  font-weight: 400 700;
+  font-style: normal;
+}
+
 :root {
   --bg: #f4f4f0;
   --paper: #ffffff;
@@ -34,7 +46,7 @@
 html, body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Source Sans 3', system-ui, sans-serif;
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
@@ -58,7 +70,7 @@ header {
 }
 
 .title {
-  font-family: 'Source Serif 4', Georgia, serif;
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   font-size: 26px;
   font-weight: 700;
   color: var(--ink);
@@ -165,7 +177,7 @@ header {
 }
 
 .stat-value {
-  font-family: 'Source Serif 4', Georgia, serif;
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   font-size: 26px;
   font-weight: 600;
   color: var(--ink);
@@ -177,7 +189,7 @@ header {
   font-size: 12px;
   color: var(--ink-faint);
   margin-left: 4px;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-weight: 400;
 }
 
@@ -211,7 +223,7 @@ header {
 }
 
 .panel-title {
-  font-family: 'Source Serif 4', Georgia, serif;
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   font-size: 15px;
   font-weight: 600;
   color: var(--ink);
@@ -997,7 +1009,7 @@ function drawChart() {
 
   ctx.strokeStyle = '#e8e8e0';
   ctx.lineWidth = 1;
-  ctx.font = '11px "Source Sans 3", sans-serif';
+  ctx.font = '11px "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   ctx.fillStyle = '#7a7a7a';
 
   const ySteps = 6;
@@ -1065,9 +1077,9 @@ function drawChart() {
     ctx.setLineDash([]);
     ctx.fillStyle = '#8a5a00';
     ctx.textAlign = 'left';
-    ctx.font = 'bold 10px "Source Sans 3", sans-serif';
+    ctx.font = 'bold 10px "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
     ctx.fillText('JETZT', xNow + 4, PAD.t + 11);
-    ctx.font = '11px "Source Sans 3", sans-serif';
+    ctx.font = '11px "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   }
 
   const slotW = Math.max(1, (plotW * (slotDuration / tRange)) * 0.82);
@@ -1088,7 +1100,7 @@ function drawChart() {
 
   ctx.fillStyle = '#7a7a7a';
   ctx.textAlign = 'left';
-  ctx.font = 'italic 11px "Source Sans 3", sans-serif';
+  ctx.font = 'italic 11px "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   ctx.fillText('ct/kWh', PAD.l, PAD.t - 4);
 
   canvas.onmousemove = e => {
@@ -1200,5 +1212,10 @@ setInterval(() => {
   }
 }, 15 * 60 * 1000);
 </script>
+<div style="max-width:700px;margin:30px auto;padding:16px 20px;font-size:10px;color:#888;line-height:1.6;text-align:center">
+  <p><strong>Datenquellen:</strong> Strompreise bereitgestellt durch die aWATTar API (api.awattar.de). Marktdaten stammen von EPEX Spot SE. Nutzung nur für den persönlichen, nicht-kommerziellen Gebrauch.</p>
+  <p><strong>Datenschutz:</strong> Alle Daten werden lokal in Ihrem Browser verarbeitet. Es werden keine Cookies gesetzt und keine externen Dienste geladen.</p>
+  <p><strong>Haftungsausschluss:</strong> Preisangaben ohne Gewähr. Netzentgelte können je nach Netzbetreiber abweichen. Keine Anlage- oder Vertragsberatung.</p>
+</div>
 </body>
 </html>

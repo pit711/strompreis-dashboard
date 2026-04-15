@@ -50,13 +50,22 @@ Für die **vergleichende Einordnung günstig/mittel/teuer** reicht die Genauigke
 ## Technik
 
 - Vanilla JS, Chart.js nicht nötig (natives SVG/DOM)
-- Source Serif 4 + Source Sans 3 (Google Fonts) – das Zeitungs-Look-&-Feel ist Absicht
+- Source Serif 4 + Source Sans 3 – werden lokal genutzt, falls installiert (kein externer Font-Load)
 - CORS-freundlich (aWATTar erlaubt Browser-Requests)
 - Cache im Speicher pro Tag
 
 ## Rechtliches
 
 Keine Anlage-, Energie- oder Steuerberatung. Alle Preisbestandteile sind öffentlich recherchiert und können sich ändern (insbesondere Netzentgelte werden jährlich neu festgesetzt). Verbindlich ist immer dein Liefervertrag.
+
+### Datenquellen & Nutzungsbedingungen
+
+- **aWATTar API** (`api.awattar.de`): Die Nutzung der API ist für den **persönlichen, nicht-kommerziellen Gebrauch** bestimmt. Für kommerzielle Nutzung bitte die [Nutzungsbedingungen von aWATTar](https://www.awattar.de) beachten.
+- **EPEX Spot SE**: Die Marktdaten (Day-Ahead-Preise DE-LU) stammen von der EPEX Spot SE und werden durch die aWATTar API bereitgestellt. Die Daten unterliegen den Nutzungsbedingungen von EPEX Spot SE und dürfen nicht für kommerzielle Zwecke weiterverwendet werden.
+
+### Datenschutz
+
+Alle Berechnungen erfolgen lokal im Browser. Es werden keine Cookies gesetzt, kein Tracking eingesetzt und keine externen Dienste (außer der aWATTar API für die Preisdaten) geladen. Google Fonts und ähnliche externe Ressourcen werden **nicht** eingebunden (DSGVO-konform).
 
 ## Lizenz
 
