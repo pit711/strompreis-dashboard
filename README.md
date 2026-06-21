@@ -4,6 +4,9 @@ Einseitiges HTML-Dashboard für **Day-Ahead Strompreise DE-LU** (EPEX Spot) mit 
 
 ![single-file](https://img.shields.io/badge/single--file-HTML-blue) ![data](https://img.shields.io/badge/data-a%C3%9Fttar%20API-orange) ![license](https://img.shields.io/badge/license-MIT-green)
 
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/711it)
+[![PayPal](https://img.shields.io/badge/PayPal-tip-00457C?logo=paypal&logoColor=white)](https://paypal.me/711IT)
+
 ## Features
 
 - **Live Day-Ahead Preise** von der [aWATTar API](https://www.awattar.de/services/api) (EPEX Spot DE-LU)
@@ -66,6 +69,13 @@ Keine Anlage-, Energie- oder Steuerberatung. Alle Preisbestandteile sind öffent
 ### Datenschutz
 
 Alle Berechnungen erfolgen lokal im Browser. Es werden keine Cookies gesetzt, kein Tracking eingesetzt und keine externen Dienste (außer der aWATTar API für die Preisdaten) geladen. Google Fonts und ähnliche externe Ressourcen werden **nicht** eingebunden (DSGVO-konform).
+
+## Unterstützen
+
+Das Projekt ist kostenlos und werbefrei. Wenn es dir hilft, hält ein kleines Trinkgeld es am Leben:
+
+- ☕ **Ko-fi:** https://ko-fi.com/711it
+- 💸 **PayPal:** https://paypal.me/711IT
 
 ## Lizenz
 
